@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Audiobook Reader - Main View</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&amp;family=Lora:ital,wght@0,400..700;1,400..700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#195de6",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#111621",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"],
+                        "serif": ["Lora", "serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .navigation-zone {
+            transition: background-color 0.2s ease;
+        }
+        .navigation-zone:hover {
+            background-color: rgba(25, 93, 230, 0.03);
+        }
+        .reader-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 selection:bg-primary/30">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md px-6 py-3">
+<div class="flex items-center gap-3">
+<button class="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-full transition-colors">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-400">arrow_back</span>
+</button>
+<div class="flex flex-col">
+<h1 class="text-sm font-bold tracking-tight text-slate-900 dark:text-slate-100">Project Hail Mary</h1>
+<p class="text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-semibold">Chapter 12: The Petrova Problem</p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="flex items-center justify-center p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400">
+<span class="material-symbols-outlined">settings_slow_motion</span>
+</button>
+<button class="flex items-center justify-center p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400">
+<span class="material-symbols-outlined">text_fields</span>
+</button>
+<button class="flex items-center justify-center p-2 rounded-lg bg-primary/10 text-primary">
+<span class="material-symbols-outlined">headphones</span>
+</button>
+</div>
+</header>
+<!-- Reader Progress Bar (Fixed Top) -->
+<div class="fixed top-[57px] left-0 right-0 z-50 h-1 bg-slate-200 dark:bg-slate-800">
+<div class="h-full bg-primary" style="width: 42%;"></div>
+</div>
+<!-- Main Content Area -->
+<main class="relative min-h-screen pt-24 pb-32 px-6 md:px-12 flex justify-center">
+<!-- Left Navigation Zone (Invisible) -->
+<div class="fixed left-0 top-0 bottom-0 w-16 md:w-32 z-10 cursor-pointer navigation-zone flex items-center justify-center group">
+<span class="material-symbols-outlined opacity-0 group-hover:opacity-40 transition-opacity text-4xl">chevron_left</span>
+</div>
+<!-- Right Navigation Zone (Invisible) -->
+<div class="fixed right-0 top-0 bottom-0 w-16 md:w-32 z-10 cursor-pointer navigation-zone flex items-center justify-center group">
+<span class="material-symbols-outlined opacity-0 group-hover:opacity-40 transition-opacity text-4xl">chevron_right</span>
+</div>
+<!-- Text Content -->
+<article class="reader-container font-serif text-xl md:text-3xl leading-relaxed md:leading-[1.8] text-slate-800 dark:text-slate-200">
+<p class="mb-12">
+                The star was dying, but it wasn't doing it quietly. It was a slow, agonizing process that painted the cosmos in hues of violent violet and deep, bruised crimson. I watched from the observation deck, my breath hitching as the sensors spiked.
+            </p>
+<p class="mb-12">
+                "We have approximately four minutes until the first wave hits," Rocky said. His voice, translated through the synth-link, sounded strangely melodic today. He was tapping his claws against the hull, a rhythmic sound that reminded me of rain on a tin roof back in California. 
+            </p>
+<!-- Active TTS Highlighted Sentence -->
+<p class="mb-12">
+<span class="bg-primary/20 dark:bg-primary/30 border-l-4 border-primary pl-4 py-1 inline-block rounded-r-lg text-slate-900 dark:text-white font-medium">
+                    The calculations were perfect, yet the sheer scale of the phenomenon made my human mind recoil in primal fear of the unknown.
+                </span>
+<span>
+                    I adjusted the dial on the magnetic shield, feeling the subtle vibration of the ship's engines as they struggled to maintain a stable orbit. Every second felt like an eternity.
+                </span>
+</p>
+<p class="mb-12">
+                If we failed here, it wasn't just us. It was everyone. The Earth would freeze, a silent snowball spinning through a lightless void. I thought of the children back in my classroom, their faces bright with curiosity, unaware that their former teacher was currently staring into the eye of a solar god.
+            </p>
+<p class="mb-12">
+                "Ready?" I asked.
+            </p>
+<p class="mb-12 italic text-slate-500 dark:text-slate-400">
+                "Question: Is 'ready' a state of mind or a physical preparedness?" Rocky replied.
+            </p>
+</article>
+</main>
+<!-- Bottom Playback Controls -->
+<footer class="fixed bottom-0 left-0 right-0 z-50 p-6 bg-gradient-to-t from-background-light dark:from-background-dark via-background-light/95 dark:via-background-dark/95 to-transparent">
+<div class="max-w-xl mx-auto flex flex-col gap-4">
+<div class="flex items-center justify-between px-2 text-xs font-bold uppercase tracking-widest text-slate-500">
+<span>12:45 remaining</span>
+<span class="text-primary">42% read</span>
+</div>
+<div class="flex items-center justify-center gap-8 md:gap-12">
+<button class="text-slate-600 dark:text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-3xl">replay_10</span>
+</button>
+<button class="size-16 flex items-center justify-center bg-primary text-white rounded-full shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-4xl fill-1">pause</span>
+</button>
+<button class="text-slate-600 dark:text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-3xl">forward_30</span>
+</button>
+</div>
+<div class="flex justify-center mt-2">
+<button class="text-[10px] font-bold uppercase tracking-tighter text-slate-400 dark:text-slate-600 border border-slate-200 dark:border-slate-800 px-3 py-1 rounded-full hover:border-primary hover:text-primary transition-all">
+                    Auto-scroll enabled
+                </button>
+</div>
+</div>
+</footer>
+</body></html>
