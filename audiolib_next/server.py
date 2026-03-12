@@ -31,11 +31,17 @@ async def upload_book(file: UploadFile = File(...)):
     if file.filename and file.filename.endswith(".txt"):
         try:
             text = content.decode("utf-8")
-            lines = text.splitlines()
-            for i, line in enumerate(lines):
-                if line.strip():
-                    text_content.append({"page": i + 1, "text": line.strip()})
-            return {"message": "Success", "content": text_content[:500]}
+            # For txt files, keep everything as a single page or chunk by double-newline
+            blocks = text.split("\n\n")
+            result_text = ""
+            for block in blocks:
+                if block.strip():
+                    # Replace single newlines within a block with spaces to form paragraphs
+                    clean_block = " ".join(block.splitlines())
+                    result_text += clean_block + "\n\n"
+            if result_text.strip():
+                text_content.append({"page": 1, "text": result_text.strip()})
+            return {"message": "Success", "content": text_content}
         except Exception as e:
             return {"message": "Error reading text", "content": [{"page": 1, "text": str(e)}]}
 
@@ -44,11 +50,15 @@ async def upload_book(file: UploadFile = File(...)):
         try:
             image = Image.open(io.BytesIO(content))
             text = pytesseract.image_to_string(image)
-            lines = text.splitlines()
-            # Append non-empty lines as text content chunks
-            for i, line in enumerate(lines):
-                if line.strip():
-                    text_content.append({"page": i + 1, "text": line.strip()})
+            # Group into single page processing double newlines
+            blocks = text.split("\n\n")
+            result_text = ""
+            for block in blocks:
+                if block.strip():
+                    clean_block = " ".join(block.splitlines())
+                    result_text += clean_block + "\n\n"
+            if result_text.strip():
+                text_content.append({"page": 1, "text": result_text.strip()})
             if not text_content:
                 text_content.append({"page": 1, "text": "No text detected in image."})
             return {"message": "Success", "content": text_content}
@@ -68,9 +78,19 @@ async def upload_book(file: UploadFile = File(...)):
         doc = fitz.open(stream=content, filetype="pdf")
         for page_num in range(len(doc)):
             page = doc[page_num]
-            text = page.get_text()
-            if text.strip():
-                text_content.append({"page": page_num + 1, "text": text})
+            # Use get_text("blocks") to preserve paragraph structure
+            blocks = page.get_text("blocks")
+            page_text = ""
+            for block in blocks:
+                # Block text is at index 4
+                block_text = block[4]
+                if block_text.strip():
+                    # Replace single newlines within the block with spaces
+                    clean_block = " ".join(block_text.splitlines())
+                    page_text += clean_block.strip() + "\n\n"
+                    
+            if page_text.strip():
+                text_content.append({"page": page_num + 1, "text": page_text.strip()})
                 
         if not text_content:
              return {"message": "Success", "content": [{"page": 1, "text": "No readable text found in this PDF."}]}

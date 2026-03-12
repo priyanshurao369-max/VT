@@ -8,6 +8,7 @@ interface Sentence {
     globalIndex: number;
     text: string;
     page: number;
+    isParagraphEnd?: boolean;
 }
 
 interface Voice {
@@ -15,6 +16,24 @@ interface Voice {
     gender: string;
     locale: string;
 }
+
+interface VoiceTypePreset {
+    id: string;
+    label: string;
+    description: string;
+    icon: string;
+    voice: string;
+    speed: number;
+}
+
+const VOICE_TYPE_PRESETS: VoiceTypePreset[] = [
+    { id: "narration", label: "Narration", description: "Deep & calm", icon: "auto_stories", voice: "en-US-GuyNeural", speed: 1.0 },
+    { id: "lecture", label: "Lecture", description: "Clear & steady", icon: "school", voice: "en-US-DavisNeural", speed: 0.9 },
+    { id: "explanation", label: "Explanation", description: "Neutral & precise", icon: "lightbulb", voice: "en-US-JennyNeural", speed: 1.0 },
+    { id: "friendly", label: "Friendly", description: "Warm & upbeat", icon: "sentiment_satisfied", voice: "en-US-AriaNeural", speed: 1.1 },
+    { id: "storytelling", label: "Storytelling", description: "Expressive & rich", icon: "menu_book", voice: "en-GB-RyanNeural", speed: 0.95 },
+    { id: "news", label: "News", description: "Crisp & formal", icon: "newspaper", voice: "en-US-SteffanNeural", speed: 1.05 },
+];
 
 export default function Home() {
     const [file, setFile] = useState<File | null>(null);
@@ -75,6 +94,7 @@ export default function Home() {
     // Voice State
     const [voices, setVoices] = useState<Voice[]>([]);
     const [selectedVoice, setSelectedVoice] = useState<string>("en-US-AriaNeural");
+    const [selectedVoiceType, setSelectedVoiceType] = useState<string>("custom");
 
     // Audio Player State
     const [activeTextIndex, setActiveTextIndex] = useState<number | null>(null);
@@ -84,6 +104,39 @@ export default function Home() {
     const audioCacheRef = useRef<Map<number, string>>(new Map());
     const [audioUrl, setAudioUrl] = useState<string | null>(null);
     const [playbackSpeed, setPlaybackSpeed] = useState(1);
+
+    // Handle voice type selection
+    const selectVoiceType = (typeId: string) => {
+        const preset = VOICE_TYPE_PRESETS.find(p => p.id === typeId);
+        if (preset) {
+            setSelectedVoiceType(typeId);
+            setSelectedVoice(preset.voice);
+            setPlaybackSpeed(preset.speed);
+            // Clear audio cache so next playback uses new voice
+            for (const url of Array.from(audioCacheRef.current.values())) {
+                URL.revokeObjectURL(url);
+            }
+            audioCacheRef.current.clear();
+        } else {
+            setSelectedVoiceType("custom");
+        }
+    };
+
+    // Revert to Custom when user manually changes voice or speed
+    const handleManualVoiceChange = (voice: string) => {
+        setSelectedVoice(voice);
+        setSelectedVoiceType("custom");
+        // Clear cache for new voice
+        for (const url of Array.from(audioCacheRef.current.values())) {
+            URL.revokeObjectURL(url);
+        }
+        audioCacheRef.current.clear();
+    };
+
+    const handleManualSpeedChange = (speed: number) => {
+        setPlaybackSpeed(speed);
+        setSelectedVoiceType("custom");
+    };
 
     // Fetch voices on mount
     useEffect(() => {
@@ -120,23 +173,40 @@ export default function Home() {
         let globalIndex = 0;
 
         content.forEach((pageData) => {
-            const parts = pageData.text.split(/([.?!]+["'\s]*)/);
-            let currentSentence = "";
-            for (let i = 0; i < parts.length; i++) {
-                currentSentence += parts[i];
-                if (i % 2 !== 0 || i === parts.length - 1) {
-                    const trimmed = currentSentence.trim();
-                    if (trimmed.length > 0) {
-                        sentences.push({
-                            globalIndex,
-                            text: trimmed,
-                            page: pageData.page
-                        });
-                        globalIndex++;
+            // Split by double newline to identify paragraphs
+            const paragraphs = pageData.text.split(/\n\n/);
+
+            paragraphs.forEach((paragraph: string, pIndex: number) => {
+                if (!paragraph.trim()) return;
+
+                const parts = paragraph.split(/([.?!]+["'\s]*)/);
+                let currentSentence = "";
+                let sentencesInParagraph: number[] = [];
+
+                for (let i = 0; i < parts.length; i++) {
+                    currentSentence += parts[i];
+                    if (i % 2 !== 0 || i === parts.length - 1) {
+                        const trimmed = currentSentence.trim();
+                        if (trimmed.length > 0) {
+                            sentences.push({
+                                globalIndex,
+                                text: trimmed,
+                                page: pageData.page,
+                                isParagraphEnd: false // Default to false, will update the last one
+                            });
+                            sentencesInParagraph.push(sentences.length - 1);
+                            globalIndex++;
+                        }
+                        currentSentence = "";
                     }
-                    currentSentence = "";
                 }
-            }
+
+                // Mark the last sentence in the paragraph
+                if (sentencesInParagraph.length > 0) {
+                    const lastSentenceIndex = sentencesInParagraph[sentencesInParagraph.length - 1];
+                    sentences[lastSentenceIndex].isParagraphEnd = true;
+                }
+            });
         });
         setFlatSentences(sentences);
     }, [content]);
@@ -658,6 +728,7 @@ export default function Home() {
                                                 {hasNote && !isActive && !isSelected && (
                                                     <span className="absolute -top-4 -right-2 text-xl drop-shadow-md z-20" title={userNotes[sentence.globalIndex]}>📌</span>
                                                 )}
+                                                {sentence.isParagraphEnd && <><br /><br /></>}
 
                                                 {/* Annotation Popup Context Menu */}
                                                 {isSelected && (
@@ -752,7 +823,7 @@ export default function Home() {
                                                 <span className="material-symbols-outlined text-slate-500 text-sm ml-2 hidden sm:block">record_voice_over</span>
                                                 <select
                                                     value={selectedVoice}
-                                                    onChange={(e) => setSelectedVoice(e.target.value)}
+                                                    onChange={(e) => handleManualVoiceChange(e.target.value)}
                                                     className="bg-transparent border-none text-xs font-bold text-slate-700 dark:text-slate-300 focus:ring-0 py-1 pl-1 pr-6 cursor-pointer max-w-[150px] truncate"
                                                 >
                                                     {voices.map(v => (
@@ -851,15 +922,52 @@ export default function Home() {
                                 )}
                             </div>
 
+                            {/* Voice Type */}
+                            <div className="space-y-3">
+                                <label className="text-sm font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-2">
+                                    <span className="material-symbols-outlined text-sm">graphic_eq</span>
+                                    Voice Type
+                                </label>
+                                <div className="grid grid-cols-3 gap-2">
+                                    {VOICE_TYPE_PRESETS.map(preset => (
+                                        <button
+                                            key={preset.id}
+                                            onClick={() => selectVoiceType(preset.id)}
+                                            className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all duration-200 text-center ${selectedVoiceType === preset.id
+                                                    ? 'border-primary bg-primary/10 dark:bg-primary/20 shadow-md shadow-primary/10'
+                                                    : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-primary/50 hover:bg-primary/5'
+                                                }`}
+                                        >
+                                            <span className={`material-symbols-outlined text-xl ${selectedVoiceType === preset.id ? 'text-primary' : 'text-slate-400 dark:text-slate-500'
+                                                }`}>{preset.icon}</span>
+                                            <span className={`text-xs font-bold ${selectedVoiceType === preset.id ? 'text-primary' : 'text-slate-700 dark:text-slate-300'
+                                                }`}>{preset.label}</span>
+                                            <span className="text-[10px] text-slate-400 dark:text-slate-500 leading-tight">{preset.description}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                                {selectedVoiceType !== "custom" && (
+                                    <p className="text-[11px] text-primary/70 font-medium flex items-center gap-1 mt-1">
+                                        <span className="material-symbols-outlined text-[14px]">info</span>
+                                        Manually changing voice or speed below will switch to Custom mode
+                                    </p>
+                                )}
+                            </div>
+
                             {/* Voice Selection */}
                             <div className="space-y-3">
                                 <label className="text-sm font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-2">
                                     <span className="material-symbols-outlined text-sm">record_voice_over</span>
                                     Neural Voice Engine
+                                    {selectedVoiceType !== "custom" && (
+                                        <span className="text-[10px] text-primary bg-primary/10 px-2 py-0.5 rounded-full font-bold ml-auto">
+                                            Set by {VOICE_TYPE_PRESETS.find(p => p.id === selectedVoiceType)?.label}
+                                        </span>
+                                    )}
                                 </label>
                                 <select
                                     value={selectedVoice}
-                                    onChange={(e) => setSelectedVoice(e.target.value)}
+                                    onChange={(e) => handleManualVoiceChange(e.target.value)}
                                     className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl h-12 px-4 focus:ring-2 focus:ring-primary text-slate-900 dark:text-slate-100 font-medium cursor-pointer"
                                 >
                                     {voices.map(v => (
@@ -873,12 +981,17 @@ export default function Home() {
                                 <label className="text-sm font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-2">
                                     <span className="material-symbols-outlined text-sm">speed</span>
                                     Playback Speed
+                                    {selectedVoiceType !== "custom" && (
+                                        <span className="text-[10px] text-primary bg-primary/10 px-2 py-0.5 rounded-full font-bold ml-auto">
+                                            Set by {VOICE_TYPE_PRESETS.find(p => p.id === selectedVoiceType)?.label}
+                                        </span>
+                                    )}
                                 </label>
                                 <div className="flex gap-2">
                                     {[0.75, 1.0, 1.25, 1.5, 2.0].map(speed => (
                                         <button
                                             key={speed}
-                                            onClick={() => setPlaybackSpeed(speed)}
+                                            onClick={() => handleManualSpeedChange(speed)}
                                             className={`flex-1 h-10 md:h-12 rounded-xl font-bold transition-colors ${playbackSpeed === speed ? 'bg-primary text-white' : 'bg-slate-50 dark:bg-slate-800 hover:bg-primary/10 hover:text-primary'}`}
                                         >
                                             {speed}x
