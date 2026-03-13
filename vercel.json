@@ -1,6 +1,0 @@
-{
-  "installCommand": "npm install --prefix audiolib_next",
-  "buildCommand": "npm run build --prefix audiolib_next",
-  "outputDirectory": "audiolib_next/.next",
-  "framework": "nextjs"
-}
