@@ -24,7 +24,7 @@ export default function RootLayout({
                     }
                 ` }} />
             </head>
-            <body suppressHydrationWarning className="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen flex flex-col selection:bg-primary/30">
+            <body suppressHydrationWarning className="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen flex flex-col selection:bg-gray-300 dark:selection:bg-gray-700">
                 <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
                     {children}
                 </ThemeProvider>

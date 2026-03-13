@@ -150,7 +150,7 @@ async def text_to_speech(body: dict):
 async def list_voices():
     voices = await edge_tts.list_voices()
     # Return a curated list of popular English voices
-    english_voices = [v for v in voices if v["Locale"].startswith("en-")]
+    english_voices = [v for v in voices if v["Locale"] == "en-US"]
     return [{"name": v["ShortName"], "gender": v["Gender"], "locale": v["Locale"]} for v in english_voices]
 
 if __name__ == "__main__":

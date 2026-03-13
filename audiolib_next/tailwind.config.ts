@@ -9,9 +9,9 @@ const config: Config = {
     theme: {
         extend: {
             colors: {
-                "primary": "#195de6",
-                "background-light": "#f6f6f8",
-                "background-dark": "#111621",
+                "primary": "#000000",
+                "background-light": "#ffffff",
+                "background-dark": "#000000",
             },
             fontFamily: {
                 "display": ["Manrope", "sans-serif"],

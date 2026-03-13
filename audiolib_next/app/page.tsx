@@ -31,7 +31,7 @@ const VOICE_TYPE_PRESETS: VoiceTypePreset[] = [
     { id: "lecture", label: "Lecture", description: "Clear & steady", icon: "school", voice: "en-US-DavisNeural", speed: 0.9 },
     { id: "explanation", label: "Explanation", description: "Neutral & precise", icon: "lightbulb", voice: "en-US-JennyNeural", speed: 1.0 },
     { id: "friendly", label: "Friendly", description: "Warm & upbeat", icon: "sentiment_satisfied", voice: "en-US-AriaNeural", speed: 1.1 },
-    { id: "storytelling", label: "Storytelling", description: "Expressive & rich", icon: "menu_book", voice: "en-GB-RyanNeural", speed: 0.95 },
+    { id: "storytelling", label: "Storytelling", description: "Expressive & rich", icon: "menu_book", voice: "en-US-ChristopherNeural", speed: 0.95 },
     { id: "news", label: "News", description: "Crisp & formal", icon: "newspaper", voice: "en-US-SteffanNeural", speed: 1.05 },
 ];
 
@@ -66,9 +66,9 @@ export default function Home() {
             if (el) {
                 el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 // Add a transient highlight effect
-                el.classList.add('!bg-green-500/30', '!ring-4', '!ring-green-500', 'shadow-2xl');
+                el.classList.add('!bg-black/20', '!ring-4', '!ring-black', 'shadow-2xl');
                 setTimeout(() => {
-                    el.classList.remove('!bg-green-500/30', '!ring-4', '!ring-green-500', 'shadow-2xl');
+                    el.classList.remove('!bg-black/20', '!ring-4', '!ring-black', 'shadow-2xl');
                 }, 2000);
             }
         }, 150);
@@ -148,7 +148,7 @@ export default function Home() {
                     setSelectedVoice(data[0].name);
                 }
             })
-            .catch(err => console.error("Failed to load voices:", err));
+            .catch(() => {});
     }, []);
 
     // Auto-scroll when activeTextIndex changes
@@ -264,7 +264,7 @@ export default function Home() {
                 setIsReadingMode(true);
             }
         } catch (err) {
-            console.error(err);
+            alert("Could not connect to the backend server. Please start the Python server (python server.py) first.");
         }
         setLoading(false);
     };
@@ -413,18 +413,18 @@ export default function Home() {
                 <div className="layout-container flex h-full grow flex-col">
                     {/* Header/Navigation */}
                     <header className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 px-6 lg:px-20 py-4 bg-background-light dark:bg-background-dark/80 backdrop-blur-md sticky top-0 z-50">
-                        <div className="flex items-center gap-2 text-primary">
+                        <div className="flex items-center gap-2 text-black dark:text-white">
                             <span className="material-symbols-outlined text-3xl">headset</span>
                             <h2 className="text-slate-900 dark:text-white text-xl font-bold tracking-tight">AudioReader</h2>
                         </div>
                         <div className="flex flex-1 justify-end gap-6 items-center">
                             <nav className="hidden md:flex items-center gap-8">
-                                <a className="text-slate-600 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors" href="#">Library</a>
-                                <a href="#" onClick={(e) => { e.preventDefault(); setIsSettingsOpen(true); }} className="text-slate-600 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors">Voice Settings</a>
-                                <a className="text-slate-600 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors" href="#">Premium</a>
+                                <a className="text-slate-600 dark:text-slate-300 text-sm font-medium hover:text-black dark:hover:text-white transition-colors" href="#">Library</a>
+                                <a href="#" onClick={(e) => { e.preventDefault(); setIsSettingsOpen(true); }} className="text-slate-600 dark:text-slate-300 text-sm font-medium hover:text-black dark:hover:text-white transition-colors">Voice Settings</a>
+                                <a className="text-slate-600 dark:text-slate-300 text-sm font-medium hover:text-black dark:hover:text-white transition-colors" href="#">Premium</a>
                             </nav>
                             <div className="h-6 w-px bg-slate-200 dark:bg-slate-800 hidden md:block"></div>
-                            <button className="flex items-center justify-center rounded-lg h-10 w-10 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary transition-all">
+                            <button className="flex items-center justify-center rounded-lg h-10 w-10 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-black/10 dark:hover:bg-white/10 hover:text-black dark:hover:text-white transition-all">
                                 <span className="material-symbols-outlined">person</span>
                             </button>
                         </div>
@@ -434,7 +434,7 @@ export default function Home() {
                         {/* Hero Section */}
                         <section className="text-center mb-16">
                             <h1 className="text-slate-900 dark:text-white text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">
-                                Turn any document into an <span className="text-primary">audiobook</span>
+                                Turn any document into an <span className="text-black dark:text-white font-black">audiobook</span>
                             </h1>
                             <p className="text-slate-600 dark:text-slate-400 text-lg max-w-2xl mx-auto">
                                 Experience your favorite articles and books through high-quality AI voices. Simply upload and listen.
@@ -443,11 +443,11 @@ export default function Home() {
 
                         {/* Upload Area */}
                         <section className="mb-16">
-                            <label className="group relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-700 bg-white/50 dark:bg-slate-800/30 hover:border-primary dark:hover:border-primary hover:bg-primary/5 transition-all duration-300 px-8 py-20 cursor-pointer">
+                            <label className="group relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-700 bg-white/50 dark:bg-slate-800/30 hover:border-black dark:hover:border-white hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-300 px-8 py-20 cursor-pointer">
                                 <div className="flex flex-col items-center gap-6">
-                                    <div className="size-20 flex items-center justify-center rounded-full bg-primary/10 text-primary group-hover:scale-110 transition-transform">
+                                    <div className="size-20 flex items-center justify-center rounded-full bg-black/10 dark:bg-white/10 text-black dark:text-white group-hover:scale-110 transition-transform">
                                         {loading ? (
-                                            <svg className="animate-spin h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24">
+                                            <svg className="animate-spin h-8 w-8 text-black dark:text-white" fill="none" viewBox="0 0 24 24">
                                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                             </svg>
@@ -475,12 +475,12 @@ export default function Home() {
                                     {file && !loading ? (
                                         <button
                                             onClick={(e) => { e.preventDefault(); handleUpload(); }}
-                                            className="flex items-center justify-center rounded-lg h-12 px-8 bg-primary text-white text-base font-bold shadow-lg shadow-primary/25 hover:bg-primary/90 transition-all active:scale-95 z-10"
+                                            className="flex items-center justify-center rounded-lg h-12 px-8 bg-black dark:bg-white text-white dark:text-black text-base font-bold shadow-lg shadow-black/25 hover:bg-gray-800 dark:hover:bg-gray-200 transition-all active:scale-95 z-10"
                                         >
                                             Start Reading
                                         </button>
                                     ) : (
-                                        <div className="flex items-center justify-center rounded-lg h-12 px-8 bg-primary text-white text-base font-bold shadow-lg shadow-primary/25 hover:bg-primary/90 transition-all active:scale-95">
+                                        <div className="flex items-center justify-center rounded-lg h-12 px-8 bg-black dark:bg-white text-white dark:text-black text-base font-bold shadow-lg shadow-black/25 hover:bg-gray-800 dark:hover:bg-gray-200 transition-all active:scale-95">
                                             {loading ? "Analyzing Document..." : "Browse Files"}
                                         </div>
                                     )}
@@ -490,7 +490,7 @@ export default function Home() {
                             {/* Supported Formats Row */}
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8">
                                 <div className="flex items-center gap-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-5">
-                                    <div className="flex size-12 items-center justify-center rounded-lg bg-red-500/10 text-red-500">
+                                    <div className="flex size-12 items-center justify-center rounded-lg bg-black/10 dark:bg-white/10 text-black dark:text-white">
                                         <span className="material-symbols-outlined">picture_as_pdf</span>
                                     </div>
                                     <div>
@@ -499,7 +499,7 @@ export default function Home() {
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-5">
-                                    <div className="flex size-12 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500">
+                                    <div className="flex size-12 items-center justify-center rounded-lg bg-black/10 dark:bg-white/10 text-black dark:text-white">
                                         <span className="material-symbols-outlined">description</span>
                                     </div>
                                     <div>
@@ -508,7 +508,7 @@ export default function Home() {
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-5">
-                                    <div className="flex size-12 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500">
+                                    <div className="flex size-12 items-center justify-center rounded-lg bg-black/10 dark:bg-white/10 text-black dark:text-white">
                                         <span className="material-symbols-outlined">image</span>
                                     </div>
                                     <div>
@@ -519,57 +519,7 @@ export default function Home() {
                             </div>
                         </section>
 
-                        {/* Recent Files Section */}
-                        <section>
-                            <div className="flex items-center justify-between mb-6">
-                                <h2 className="text-slate-900 dark:text-white text-2xl font-bold tracking-tight">Recent Files</h2>
-                                <button className="text-primary text-sm font-semibold hover:underline">View All</button>
-                            </div>
-                            <div className="space-y-3">
-                                {/* Recent Item 1 */}
-                                <div className="flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-4 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-colors">
-                                    <div className="flex items-center gap-4">
-                                        <div className="size-10 flex items-center justify-center rounded bg-slate-100 dark:bg-slate-800 text-slate-500">
-                                            <span className="material-symbols-outlined">article</span>
-                                        </div>
-                                        <div>
-                                            <p className="text-slate-900 dark:text-slate-100 font-medium">The Martian - Chapter 1.pdf</p>
-                                            <p className="text-slate-500 text-xs">Modified 2 hours ago • 1.2 MB</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-xs text-slate-500 font-medium bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">85% read</span>
-                                        <button className="size-10 flex items-center justify-center rounded-full text-primary hover:bg-primary/10">
-                                            <span className="material-symbols-outlined">play_circle</span>
-                                        </button>
-                                        <button className="size-10 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
-                                            <span className="material-symbols-outlined">more_vert</span>
-                                        </button>
-                                    </div>
-                                </div>
-                                {/* Recent Item 2 */}
-                                <div className="flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-4 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-colors">
-                                    <div className="flex items-center gap-4">
-                                        <div className="size-10 flex items-center justify-center rounded bg-slate-100 dark:bg-slate-800 text-slate-500">
-                                            <span className="material-symbols-outlined">description</span>
-                                        </div>
-                                        <div>
-                                            <p className="text-slate-900 dark:text-slate-100 font-medium">Project_Notes_Draft.txt</p>
-                                            <p className="text-slate-500 text-xs">Modified yesterday • 15 KB</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-xs text-slate-500 font-medium bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">New</span>
-                                        <button className="size-10 flex items-center justify-center rounded-full text-primary hover:bg-primary/10">
-                                            <span className="material-symbols-outlined">play_circle</span>
-                                        </button>
-                                        <button className="size-10 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
-                                            <span className="material-symbols-outlined">more_vert</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </section>
+
                     </main>
 
                     {/* Footer */}
@@ -580,10 +530,10 @@ export default function Home() {
                                 <span className="text-sm">© 2024 AudioReader AI. Distraction-free listening.</span>
                             </div>
                             <div className="flex gap-8">
-                                <a className="text-slate-500 hover:text-primary text-xs uppercase tracking-widest font-bold transition-colors" href="#">Privacy</a>
-                                <a className="text-slate-500 hover:text-primary text-xs uppercase tracking-widest font-bold transition-colors" href="#">Terms</a>
-                                <a className="text-slate-500 hover:text-primary text-xs uppercase tracking-widest font-bold transition-colors" href="#">Support</a>
-                                <a className="text-slate-500 hover:text-primary text-xs uppercase tracking-widest font-bold transition-colors" href="#">API</a>
+                                <a className="text-slate-500 hover:text-black dark:hover:text-white text-xs uppercase tracking-widest font-bold transition-colors" href="#">Privacy</a>
+                                <a className="text-slate-500 hover:text-black dark:hover:text-white text-xs uppercase tracking-widest font-bold transition-colors" href="#">Terms</a>
+                                <a className="text-slate-500 hover:text-black dark:hover:text-white text-xs uppercase tracking-widest font-bold transition-colors" href="#">Support</a>
+                                <a className="text-slate-500 hover:text-black dark:hover:text-white text-xs uppercase tracking-widest font-bold transition-colors" href="#">API</a>
                             </div>
                         </div>
                     </footer>
@@ -612,7 +562,7 @@ export default function Home() {
                             <button className="flex items-center justify-center p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400">
                                 <span className="material-symbols-outlined">text_fields</span>
                             </button>
-                            <button className="flex items-center justify-center p-2 rounded-lg bg-primary/10 text-primary">
+                            <button className="flex items-center justify-center p-2 rounded-lg bg-black/10 dark:bg-white/10 text-black dark:text-white">
                                 <span className="material-symbols-outlined">headphones</span>
                             </button>
                         </div>
@@ -628,7 +578,7 @@ export default function Home() {
                                         placeholder="Search document..."
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-xl pl-10 pr-4 py-3 text-sm focus:ring-2 focus:ring-primary text-slate-900 dark:text-slate-100 shadow-inner"
+                                        className="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-xl pl-10 pr-4 py-3 text-sm focus:ring-2 focus:ring-black dark:focus:ring-white text-slate-900 dark:text-slate-100 shadow-inner"
                                     />
                                 </div>
 
@@ -641,7 +591,7 @@ export default function Home() {
                                                 className="p-3 bg-slate-50 dark:bg-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl cursor-pointer transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
                                             >
                                                 <div className="flex justify-between items-center mb-1">
-                                                    <p className="text-xs text-primary font-bold flex items-center gap-1">
+                                                    <p className="text-xs text-black dark:text-white font-bold flex items-center gap-1">
                                                         <span className="material-symbols-outlined text-[14px]">find_in_page</span>
                                                         Page {res.page}
                                                     </p>
@@ -664,7 +614,7 @@ export default function Home() {
                     </header>
                     {/* Reader Progress Bar (Fixed Top) */}
                     <div className="fixed top-[57px] left-0 right-0 z-50 h-1 bg-slate-200 dark:bg-slate-800">
-                        <div className="h-full bg-primary transition-all duration-300 ease-out" style={{ width: `${activeTextIndex !== null && flatSentences.length > 0 ? ((activeTextIndex + 1) / flatSentences.length) * 100 : 0}%` }}></div>
+                        <div className="h-full bg-black dark:bg-white transition-all duration-300 ease-out" style={{ width: `${activeTextIndex !== null && flatSentences.length > 0 ? ((activeTextIndex + 1) / flatSentences.length) * 100 : 0}%` }}></div>
                     </div>
 
                     {/* Main Content Area */}
@@ -674,7 +624,7 @@ export default function Home() {
                             onClick={() => setCurrentPageNumber(p => Math.max(1, p - 1))}
                             className={`fixed left-0 top-[150px] bottom-32 w-12 md:w-24 z-10 cursor-pointer flex items-center justify-center group transition-all hover:bg-slate-100 dark:hover:bg-slate-800 border-r border-transparent hover:border-slate-200 dark:hover:border-slate-700 ${currentPageNumber <= 1 ? 'hidden' : ''}`}
                         >
-                            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-3 rounded-r-2xl shadow-sm border border-l-0 border-slate-200 dark:border-slate-700 text-slate-400 group-hover:text-primary transition-colors flex items-center justify-center">
+                            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-3 rounded-r-2xl shadow-sm border border-l-0 border-slate-200 dark:border-slate-700 text-slate-400 group-hover:text-black dark:group-hover:text-white transition-colors flex items-center justify-center">
                                 <span className="material-symbols-outlined text-3xl md:text-4xl">chevron_left</span>
                             </div>
                         </div>
@@ -684,7 +634,7 @@ export default function Home() {
                             onClick={() => setCurrentPageNumber(p => Math.min(availablePages[availablePages.length - 1] || 1, p + 1))}
                             className={`fixed right-0 top-[150px] bottom-32 w-12 md:w-24 z-10 cursor-pointer flex items-center justify-center group transition-all hover:bg-slate-100 dark:hover:bg-slate-800 border-l border-transparent hover:border-slate-200 dark:hover:border-slate-700 ${currentPageNumber >= (availablePages[availablePages.length - 1] || 1) ? 'hidden' : ''}`}
                         >
-                            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-3 rounded-l-2xl shadow-sm border border-r-0 border-slate-200 dark:border-slate-700 text-slate-400 group-hover:text-primary transition-colors flex items-center justify-center">
+                            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-3 rounded-l-2xl shadow-sm border border-r-0 border-slate-200 dark:border-slate-700 text-slate-400 group-hover:text-black dark:group-hover:text-white transition-colors flex items-center justify-center">
                                 <span className="material-symbols-outlined text-3xl md:text-4xl">chevron_right</span>
                             </div>
                         </div>
@@ -703,11 +653,11 @@ export default function Home() {
                                         let styleClasses = "cursor-pointer transition-all duration-300 inline py-0.5 md:py-1 pr-1 relative z-10 ";
 
                                         if (isActive) {
-                                            styleClasses += "bg-primary/20 dark:bg-primary/30 border-l-4 border-primary pl-4 py-1 inline-block rounded-r-lg text-slate-900 dark:text-white font-medium ";
+                                            styleClasses += "bg-black/10 dark:bg-white/20 border-l-4 border-black dark:border-white pl-4 py-1 inline-block rounded-r-lg text-black dark:text-white font-medium ";
                                         } else if (isHighlighted && isSelected) {
-                                            styleClasses += "bg-yellow-500/50 text-slate-900 dark:text-yellow-100 pl-1 ring-4 ring-primary rounded-lg ";
+                                            styleClasses += "bg-gray-300/50 dark:bg-gray-500/50 text-black dark:text-white pl-1 ring-4 ring-black dark:ring-white rounded-lg ";
                                         } else if (isHighlighted) {
-                                            styleClasses += "bg-yellow-500/30 text-slate-900 dark:text-yellow-100 pl-1 rounded-lg ";
+                                            styleClasses += "bg-gray-300/30 dark:bg-gray-500/30 text-black dark:text-white pl-1 rounded-lg ";
                                         } else if (isSelected) {
                                             styleClasses += "bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white pl-1 ring-4 ring-slate-400 rounded-lg shadow-2xl ";
                                         } else {
@@ -738,13 +688,13 @@ export default function Home() {
                                                             <div className="flex gap-3 mb-4">
                                                                 <button
                                                                     onClick={(e) => { e.stopPropagation(); toggleHighlight(sentence.globalIndex); }}
-                                                                    className={`flex-1 text-sm py-2.5 rounded-xl font-bold transition-all shadow-sm ${isHighlighted ? 'bg-yellow-500/20 text-yellow-300 hover:bg-yellow-500/30 border border-yellow-500/30' : 'bg-gray-800 text-gray-200 hover:bg-gray-700 border border-gray-600'}`}
+                                                                    className={`flex-1 text-sm py-2.5 rounded-xl font-bold transition-all shadow-sm ${isHighlighted ? 'bg-white/20 text-white hover:bg-white/30 border border-white/30' : 'bg-gray-800 text-gray-200 hover:bg-gray-700 border border-gray-600'}`}
                                                                 >
                                                                     {isHighlighted ? "Remove Highlight" : "Highlight"}
                                                                 </button>
                                                                 <button
                                                                     onClick={(e) => { e.stopPropagation(); playSentence(sentence.globalIndex); }}
-                                                                    className="flex-1 text-sm py-2.5 rounded-xl font-bold bg-blue-600/20 text-blue-300 hover:bg-blue-600/30 border border-blue-600/30 transition-all shadow-sm flex items-center justify-center gap-2"
+                                                                    className="flex-1 text-sm py-2.5 rounded-xl font-bold bg-white/20 text-white hover:bg-white/30 border border-white/30 transition-all shadow-sm flex items-center justify-center gap-2"
                                                                 >
                                                                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
                                                                     Play
@@ -754,7 +704,7 @@ export default function Home() {
                                                                 value={noteDraft}
                                                                 onChange={(e) => setNoteDraft(e.target.value)}
                                                                 placeholder="Add a sticky note..."
-                                                                className="w-full h-28 bg-gray-950 border border-gray-700/50 rounded-xl p-4 text-sm text-gray-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none mb-4 shadow-inner"
+                                                                className="w-full h-28 bg-gray-950 border border-gray-700/50 rounded-xl p-4 text-sm text-gray-200 focus:outline-none focus:border-white focus:ring-1 focus:ring-white resize-none mb-4 shadow-inner"
                                                             />
                                                             <div className="flex justify-between items-center">
                                                                 <button
@@ -765,7 +715,7 @@ export default function Home() {
                                                                 </button>
                                                                 <button
                                                                     onClick={(e) => { e.stopPropagation(); saveNote(sentence.globalIndex); }}
-                                                                    className="text-sm bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-blue-900/50 transition-all active:scale-95"
+                                                                    className="text-sm bg-black hover:bg-gray-800 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-black/50 transition-all active:scale-95"
                                                                 >
                                                                     Save Note
                                                                 </button>
@@ -805,7 +755,7 @@ export default function Home() {
                                     <div className="space-y-2">
                                         <div className="relative h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
                                             <div
-                                                className="absolute top-0 left-0 h-full bg-primary rounded-full transition-all duration-300 ease-out"
+                                                className="absolute top-0 left-0 h-full bg-black dark:bg-white rounded-full transition-all duration-300 ease-out"
                                                 style={{ width: `${activeTextIndex !== null ? ((activeTextIndex + 1) / flatSentences.length) * 100 : 0}%` }}
                                             />
                                         </div>
@@ -838,7 +788,7 @@ export default function Home() {
                                             <button
                                                 onClick={() => playSentence(Math.max(0, (activeTextIndex || 0) - 1))}
                                                 disabled={activeTextIndex === null || activeTextIndex === 0 || loadingAudio}
-                                                className="p-2 text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary disabled:opacity-30 transition-colors flex items-center justify-center bg-slate-100 dark:bg-slate-800 hover:bg-primary/10 rounded-full"
+                                                className="p-2 text-slate-600 dark:text-slate-400 hover:text-black dark:hover:text-white disabled:opacity-30 transition-colors flex items-center justify-center bg-slate-100 dark:bg-slate-800 hover:bg-black/10 dark:hover:bg-white/10 rounded-full"
                                             >
                                                 <span className="material-symbols-outlined text-2xl">skip_previous</span>
                                             </button>
@@ -846,7 +796,7 @@ export default function Home() {
                                             <button
                                                 onClick={togglePlayback}
                                                 disabled={loadingAudio}
-                                                className="size-12 md:size-16 flex items-center justify-center bg-primary text-white rounded-full hover:bg-blue-600 shadow-[0_8px_16px_rgba(25,93,230,0.3)] transition-all hover:scale-105 active:scale-95 disabled:opacity-50 touch-manipulation flex-shrink-0"
+                                                className="size-12 md:size-16 flex items-center justify-center bg-black dark:bg-white text-white dark:text-black rounded-full hover:bg-gray-800 dark:hover:bg-gray-200 shadow-[0_8px_16px_rgba(0,0,0,0.3)] transition-all hover:scale-105 active:scale-95 disabled:opacity-50 touch-manipulation flex-shrink-0"
                                             >
                                                 {loadingAudio ? (
                                                     <svg className="animate-spin h-6 w-6 text-white" viewBox="0 0 24 24">
@@ -863,7 +813,7 @@ export default function Home() {
                                             <button
                                                 onClick={() => playSentence(Math.min(flatSentences.length - 1, (activeTextIndex || 0) + 1))}
                                                 disabled={activeTextIndex === null || activeTextIndex === flatSentences.length - 1 || loadingAudio}
-                                                className="p-2 text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary disabled:opacity-30 transition-colors flex items-center justify-center bg-slate-100 dark:bg-slate-800 hover:bg-primary/10 rounded-full"
+                                                className="p-2 text-slate-600 dark:text-slate-400 hover:text-black dark:hover:text-white disabled:opacity-30 transition-colors flex items-center justify-center bg-slate-100 dark:bg-slate-800 hover:bg-black/10 dark:hover:bg-white/10 rounded-full"
                                             >
                                                 <span className="material-symbols-outlined text-2xl">skip_next</span>
                                             </button>
@@ -873,7 +823,7 @@ export default function Home() {
                                         <div className="flex items-center justify-end w-full md:w-auto">
                                             <button
                                                 onClick={cycleSpeed}
-                                                className="px-3 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-primary hover:border-primary hover:text-white transition-all font-mono"
+                                                className="px-3 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-black dark:hover:bg-white hover:border-black dark:hover:border-white hover:text-white dark:hover:text-black transition-all font-mono"
                                                 title="Playback Speed"
                                             >
                                                 {playbackSpeed}x
@@ -909,13 +859,13 @@ export default function Home() {
                                 </label>
                                 {mounted && (
                                     <div className="grid grid-cols-3 gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
-                                        <button onClick={() => setTheme('light')} className={`flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-all ${theme === 'light' ? 'bg-white dark:bg-slate-700 shadow-sm text-primary' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}>
+                                        <button onClick={() => setTheme('light')} className={`flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-all ${theme === 'light' ? 'bg-white dark:bg-slate-700 shadow-sm text-black dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}>
                                             <span className="material-symbols-outlined text-[18px]">light_mode</span> Light
                                         </button>
-                                        <button onClick={() => setTheme('dark')} className={`flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-all ${theme === 'dark' ? 'bg-white dark:bg-slate-700 shadow-sm text-primary' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}>
+                                        <button onClick={() => setTheme('dark')} className={`flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-all ${theme === 'dark' ? 'bg-white dark:bg-slate-700 shadow-sm text-black dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}>
                                             <span className="material-symbols-outlined text-[18px]">dark_mode</span> Dark
                                         </button>
-                                        <button onClick={() => setTheme('system')} className={`flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-all ${theme === 'system' ? 'bg-white dark:bg-slate-700 shadow-sm text-primary' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}>
+                                        <button onClick={() => setTheme('system')} className={`flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-all ${theme === 'system' ? 'bg-white dark:bg-slate-700 shadow-sm text-black dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}>
                                             <span className="material-symbols-outlined text-[18px]">computer</span> System
                                         </button>
                                     </div>
@@ -934,20 +884,20 @@ export default function Home() {
                                             key={preset.id}
                                             onClick={() => selectVoiceType(preset.id)}
                                             className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all duration-200 text-center ${selectedVoiceType === preset.id
-                                                    ? 'border-primary bg-primary/10 dark:bg-primary/20 shadow-md shadow-primary/10'
-                                                    : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-primary/50 hover:bg-primary/5'
+                                                    ? 'border-black dark:border-white bg-black/10 dark:bg-white/20 shadow-md shadow-black/10'
+                                                    : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-black/50 dark:hover:border-white/50 hover:bg-black/5 dark:hover:bg-white/5'
                                                 }`}
                                         >
-                                            <span className={`material-symbols-outlined text-xl ${selectedVoiceType === preset.id ? 'text-primary' : 'text-slate-400 dark:text-slate-500'
+                                            <span className={`material-symbols-outlined text-xl ${selectedVoiceType === preset.id ? 'text-black dark:text-white' : 'text-slate-400 dark:text-slate-500'
                                                 }`}>{preset.icon}</span>
-                                            <span className={`text-xs font-bold ${selectedVoiceType === preset.id ? 'text-primary' : 'text-slate-700 dark:text-slate-300'
+                                            <span className={`text-xs font-bold ${selectedVoiceType === preset.id ? 'text-black dark:text-white' : 'text-slate-700 dark:text-slate-300'
                                                 }`}>{preset.label}</span>
                                             <span className="text-[10px] text-slate-400 dark:text-slate-500 leading-tight">{preset.description}</span>
                                         </button>
                                     ))}
                                 </div>
                                 {selectedVoiceType !== "custom" && (
-                                    <p className="text-[11px] text-primary/70 font-medium flex items-center gap-1 mt-1">
+                                    <p className="text-[11px] text-black/70 dark:text-white/70 font-medium flex items-center gap-1 mt-1">
                                         <span className="material-symbols-outlined text-[14px]">info</span>
                                         Manually changing voice or speed below will switch to Custom mode
                                     </p>
@@ -960,7 +910,7 @@ export default function Home() {
                                     <span className="material-symbols-outlined text-sm">record_voice_over</span>
                                     Neural Voice Engine
                                     {selectedVoiceType !== "custom" && (
-                                        <span className="text-[10px] text-primary bg-primary/10 px-2 py-0.5 rounded-full font-bold ml-auto">
+                                        <span className="text-[10px] text-black dark:text-white bg-black/10 dark:bg-white/10 px-2 py-0.5 rounded-full font-bold ml-auto">
                                             Set by {VOICE_TYPE_PRESETS.find(p => p.id === selectedVoiceType)?.label}
                                         </span>
                                     )}
@@ -968,7 +918,7 @@ export default function Home() {
                                 <select
                                     value={selectedVoice}
                                     onChange={(e) => handleManualVoiceChange(e.target.value)}
-                                    className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl h-12 px-4 focus:ring-2 focus:ring-primary text-slate-900 dark:text-slate-100 font-medium cursor-pointer"
+                                    className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl h-12 px-4 focus:ring-2 focus:ring-black dark:focus:ring-white text-slate-900 dark:text-slate-100 font-medium cursor-pointer"
                                 >
                                     {voices.map(v => (
                                         <option key={v.name} value={v.name}>{v.name} ({v.locale} - {v.gender})</option>
@@ -982,7 +932,7 @@ export default function Home() {
                                     <span className="material-symbols-outlined text-sm">speed</span>
                                     Playback Speed
                                     {selectedVoiceType !== "custom" && (
-                                        <span className="text-[10px] text-primary bg-primary/10 px-2 py-0.5 rounded-full font-bold ml-auto">
+                                        <span className="text-[10px] text-black dark:text-white bg-black/10 dark:bg-white/10 px-2 py-0.5 rounded-full font-bold ml-auto">
                                             Set by {VOICE_TYPE_PRESETS.find(p => p.id === selectedVoiceType)?.label}
                                         </span>
                                     )}
@@ -992,7 +942,7 @@ export default function Home() {
                                         <button
                                             key={speed}
                                             onClick={() => handleManualSpeedChange(speed)}
-                                            className={`flex-1 h-10 md:h-12 rounded-xl font-bold transition-colors ${playbackSpeed === speed ? 'bg-primary text-white' : 'bg-slate-50 dark:bg-slate-800 hover:bg-primary/10 hover:text-primary'}`}
+                                            className={`flex-1 h-10 md:h-12 rounded-xl font-bold transition-colors ${playbackSpeed === speed ? 'bg-black dark:bg-white text-white dark:text-black' : 'bg-slate-50 dark:bg-slate-800 hover:bg-black/10 dark:hover:bg-white/10 hover:text-black dark:hover:text-white'}`}
                                         >
                                             {speed}x
                                         </button>
