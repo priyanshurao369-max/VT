@@ -1,0 +1,6 @@
+{
+  "installCommand": "cd audiolib_next && npm install",
+  "buildCommand": "cd audiolib_next && npm run build",
+  "outputDirectory": "audiolib_next/.next",
+  "framework": "nextjs"
+}
