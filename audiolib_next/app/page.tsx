@@ -415,7 +415,7 @@ export default function Home() {
                     <header className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 px-6 lg:px-20 py-4 bg-background-light dark:bg-background-dark/80 backdrop-blur-md sticky top-0 z-50">
                         <div className="flex items-center gap-2 text-black dark:text-white">
                             <span className="material-symbols-outlined text-3xl">headset</span>
-                            <h2 className="text-slate-900 dark:text-white text-xl font-bold tracking-tight">AudioReader</h2>
+                            <h2 className="text-slate-900 dark:text-white text-xl font-bold tracking-tight">Voice Tech</h2>
                         </div>
                         <div className="flex flex-1 justify-end gap-6 items-center">
                             <nav className="hidden md:flex items-center gap-8">
@@ -527,7 +527,7 @@ export default function Home() {
                         <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
                             <div className="flex items-center gap-2 text-slate-400">
                                 <span className="material-symbols-outlined text-xl">headset</span>
-                                <span className="text-sm">© 2024 AudioReader AI. Distraction-free listening.</span>
+                                <span className="text-sm">© 2024 Voice Tech AI. Distraction-free listening.</span>
                             </div>
                             <div className="flex gap-8">
                                 <a className="text-slate-500 hover:text-black dark:hover:text-white text-xs uppercase tracking-widest font-bold transition-colors" href="#">Privacy</a>

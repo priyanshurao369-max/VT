@@ -1,7 +1,7 @@
 import "./globals.css"
 
 export const metadata = {
-    title: 'Audiobook Reader',
+    title: 'Voice Tech',
     description: 'Turn any document into an audiobook',
 }
 
