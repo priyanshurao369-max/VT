@@ -414,7 +414,7 @@ export default function Home() {
                     {/* Header/Navigation */}
                     <header className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 px-6 lg:px-20 py-4 bg-background-light dark:bg-background-dark/80 backdrop-blur-md sticky top-0 z-50">
                         <div className="flex items-center gap-2 text-black dark:text-white">
-                            <span className="material-symbols-outlined text-3xl">headset</span>
+                            <img src="/logo.png" alt="Voice Tech Logo" className="h-8 w-8 object-contain" />
                             <h2 className="text-slate-900 dark:text-white text-xl font-bold tracking-tight">Voice Tech</h2>
                         </div>
                         <div className="flex flex-1 justify-end gap-6 items-center">
@@ -526,7 +526,7 @@ export default function Home() {
                     <footer className="mt-auto border-t border-slate-200 dark:border-slate-800 py-10 px-6 lg:px-20">
                         <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
                             <div className="flex items-center gap-2 text-slate-400">
-                                <span className="material-symbols-outlined text-xl">headset</span>
+                                <img src="/logo.png" alt="Voice Tech Logo" className="h-5 w-5 object-contain grayscale opacity-60" />
                                 <span className="text-sm">© 2024 Voice Tech AI. Distraction-free listening.</span>
                             </div>
                             <div className="flex gap-8">
@@ -563,7 +563,7 @@ export default function Home() {
                                 <span className="material-symbols-outlined">text_fields</span>
                             </button>
                             <button className="flex items-center justify-center p-2 rounded-lg bg-black/10 dark:bg-white/10 text-black dark:text-white">
-                                <span className="material-symbols-outlined">headphones</span>
+                                <img src="/logo.png" alt="Logo" className="h-5 w-5 object-contain invert dark:invert-0" />
                             </button>
                         </div>
 
