@@ -35,20 +35,27 @@ const VOICE_TYPE_PRESETS: VoiceTypePreset[] = [
     { id: "news", label: "News", description: "Crisp & formal", icon: "newspaper", voice: "en-US-SteffanNeural", speed: 1.05 },
 ];
 
+const API_BASE_URL = "http://127.0.0.1:8000";
+
 export default function Home() {
     const [file, setFile] = useState<File | null>(null);
     const [content, setContent] = useState<any[]>([]);
     const [flatSentences, setFlatSentences] = useState<Sentence[]>([]);
     const [loading, setLoading] = useState(false);
+    const [processingStep, setProcessingStep] = useState<string>("");
+    const initialLoadDone = useRef<string | null>(null);
 
     // New reading mode features
     const [isReadingMode, setIsReadingMode] = useState(false);
     const [currentPageNumber, setCurrentPageNumber] = useState(1);
     const [isControlsMinimized, setIsControlsMinimized] = useState(false);
+    const [isFocusMode, setIsFocusMode] = useState(false);
 
     // Search feature
     const [searchQuery, setSearchQuery] = useState("");
     const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [transientSearchHighlight, setTransientSearchHighlight] = useState<number | null>(null);
+
     const searchResults = useMemo(() => {
         if (!searchQuery.trim() || flatSentences.length === 0) return [];
         const query = searchQuery.toLowerCase();
@@ -65,10 +72,10 @@ export default function Home() {
             const el = document.getElementById(`sentence-${result.globalIndex}`);
             if (el) {
                 el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                // Add a transient highlight effect
-                el.classList.add('!bg-black/20', '!ring-4', '!ring-black', 'shadow-2xl');
+                // Add a transient highlight effect using state
+                setTransientSearchHighlight(result.globalIndex);
                 setTimeout(() => {
-                    el.classList.remove('!bg-black/20', '!ring-4', '!ring-black', 'shadow-2xl');
+                    setTransientSearchHighlight(null);
                 }, 2000);
             }
         }, 150);
@@ -140,7 +147,7 @@ export default function Home() {
 
     // Fetch voices on mount
     useEffect(() => {
-        fetch("http://127.0.0.1:8000/api/voices")
+        fetch(`${API_BASE_URL}/api/voices`)
             .then(res => res.json())
             .then(data => {
                 setVoices(data);
@@ -167,6 +174,114 @@ export default function Home() {
         }
     }, [playbackSpeed, audioUrl, isPlaying]);
 
+    // --- PERSISTENCE LOGIC ---
+    const getStorageKey = (suffix: string) => {
+        if (!file) return null;
+        return `vt_v1_${file.name}_${suffix}`;
+    };
+
+    // Load state from localStorage when document content is ready
+    useEffect(() => {
+        if (!file || !isReadingMode || flatSentences.length === 0) return;
+        
+        // If we already loaded this file, don't reload (avoids loops)
+        if (initialLoadDone.current === file.name) return;
+
+        console.log(`Loading state for ${file.name}`);
+        const highlightsKey = getStorageKey("highlights");
+        const notesKey = getStorageKey("notes");
+        const progressKey = getStorageKey("progress");
+        const pageKey = getStorageKey("page");
+
+        if (highlightsKey) {
+            const saved = localStorage.getItem(highlightsKey);
+            if (saved) setUserHighlights(new Set(JSON.parse(saved)));
+            else setUserHighlights(new Set());
+        }
+        if (notesKey) {
+            const saved = localStorage.getItem(notesKey);
+            if (saved) setUserNotes(JSON.parse(saved));
+            else setUserNotes({});
+        }
+        if (progressKey) {
+            const saved = localStorage.getItem(progressKey);
+            if (saved) setActiveTextIndex(JSON.parse(saved));
+        }
+        if (pageKey) {
+            const saved = localStorage.getItem(pageKey);
+            if (saved) setCurrentPageNumber(JSON.parse(saved));
+        }
+
+        initialLoadDone.current = file.name;
+    }, [file, isReadingMode, flatSentences]);
+
+    // Save highlights (only if initial load is done for this file)
+    useEffect(() => {
+        if (!file || initialLoadDone.current !== file.name) return;
+        const key = getStorageKey("highlights");
+        if (key && userHighlights.size > 0) {
+            localStorage.setItem(key, JSON.stringify(Array.from(userHighlights)));
+        } else if (key) {
+            localStorage.removeItem(key);
+        }
+    }, [userHighlights, file]);
+
+    // Save notes (only if initial load is done for this file)
+    useEffect(() => {
+        if (!file || initialLoadDone.current !== file.name) return;
+        const key = getStorageKey("notes");
+        if (key && Object.keys(userNotes).length > 0) {
+            localStorage.setItem(key, JSON.stringify(userNotes));
+        } else if (key) {
+            localStorage.removeItem(key);
+        }
+    }, [userNotes, file]);
+
+    // Save reading progress
+    useEffect(() => {
+        if (!file || initialLoadDone.current !== file.name) return;
+        const key = getStorageKey("progress");
+        if (key && activeTextIndex !== null) {
+            localStorage.setItem(key, JSON.stringify(activeTextIndex));
+        }
+    }, [activeTextIndex, file]);
+
+    // Save current page
+    useEffect(() => {
+        if (!file || initialLoadDone.current !== file.name) return;
+        const key = getStorageKey("page");
+        if (key) {
+            localStorage.setItem(key, JSON.stringify(currentPageNumber));
+        }
+    }, [currentPageNumber, file]);
+
+    // Keyboard shortcuts
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            // Space for Play/Pause (avoiding inputs)
+            if (e.code === 'Space' && 
+                !(e.target instanceof HTMLInputElement) && 
+                !(e.target instanceof HTMLTextAreaElement)) {
+                e.preventDefault();
+                togglePlayback();
+            }
+            // Ctrl + F for Focus Mode
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') {
+                e.preventDefault();
+                setIsFocusMode(prev => !prev);
+            }
+            // Escape to close modals or exit search
+            if (e.key === 'Escape') {
+                if (isSearchOpen) setIsSearchOpen(false);
+                if (isSettingsOpen) setIsSettingsOpen(false);
+                if (selectedSentenceForAnnotation !== null) setSelectedSentenceForAnnotation(null);
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isSearchOpen, isSettingsOpen, selectedSentenceForAnnotation, isPlaying, activeTextIndex, flatSentences]);
+    // --- END PERSISTENCE LOGIC ---
+
     // Parse the page blocks into individual sentences when content updates
     useEffect(() => {
         const sentences: Sentence[] = [];
@@ -179,7 +294,9 @@ export default function Home() {
             paragraphs.forEach((paragraph: string, pIndex: number) => {
                 if (!paragraph.trim()) return;
 
-                const parts = paragraph.split(/([.?!]+["'\s]*)/);
+                const ABBREVIATIONS = ["Mr", "Mrs", "Ms", "Dr", "Prof", "Sr", "Jr", "vs", "Mt", "St", "U.S", "U.K", "a.m", "p.m"];
+                const regex = new RegExp(`(?<!\\b(?:${ABBREVIATIONS.join("|")}))([.?!]+["'\\s]*)`);
+                const parts = paragraph.split(regex);
                 let currentSentence = "";
                 let sentencesInParagraph: number[] = [];
 
@@ -216,7 +333,7 @@ export default function Home() {
         if (index >= flatSentences.length || audioCacheRef.current.has(index)) return;
         try {
             const sentenceText = flatSentences[index].text;
-            const url = `http://127.0.0.1:8000/api/tts?text=${encodeURIComponent(sentenceText)}&voice=${encodeURIComponent(selectedVoice)}`;
+            const url = `${API_BASE_URL}/api/tts?text=${encodeURIComponent(sentenceText)}&voice=${encodeURIComponent(selectedVoice)}`;
             const res = await fetch(url);
             if (!res.ok) throw new Error("TTS fetch failed");
             const blob = await res.blob();
@@ -246,18 +363,25 @@ export default function Home() {
     const handleUpload = async () => {
         if (!file) return;
         setLoading(true);
+        setProcessingStep("Sending to server...");
         resetAudio();
         setContent([]);
         setFlatSentences([]);
+        setUserHighlights(new Set());
+        setUserNotes({});
+        initialLoadDone.current = null;
 
         const fd = new FormData();
         fd.append("file", file);
         try {
-            const res = await fetch("http://127.0.0.1:8000/api/upload", {
+            const res = await fetch(`${API_BASE_URL}/api/upload`, {
                 method: "POST",
                 body: fd,
             });
+            setProcessingStep("Extracting text...");
             const data = await res.json();
+            
+            setProcessingStep("Splitting into sentences...");
             setContent(data.content);
             if (data.content && data.content.length > 0) {
                 setCurrentPageNumber(data.content[0].page);
@@ -267,6 +391,7 @@ export default function Home() {
             alert("Could not connect to the backend server. Please start the Python server (python server.py) first.");
         }
         setLoading(false);
+        setProcessingStep("");
     };
 
     const exitReadingMode = () => {
@@ -316,7 +441,7 @@ export default function Home() {
             if (cachedUrl) {
                 setAudioUrl(cachedUrl);
             } else {
-                const url = `http://127.0.0.1:8000/api/tts?text=${encodeURIComponent(sentenceText)}&voice=${encodeURIComponent(selectedVoice)}`;
+                const url = `${API_BASE_URL}/api/tts?text=${encodeURIComponent(sentenceText)}&voice=${encodeURIComponent(selectedVoice)}`;
                 setAudioUrl(url);
             }
         } catch (err) {
@@ -357,7 +482,7 @@ export default function Home() {
         }
     };
 
-    // Sync page with playing sentence
+    // Sync page with playing sentence or manual scroll
     useEffect(() => {
         if (activeTextIndex !== null) {
             const currentSentence = flatSentences[activeTextIndex];
@@ -368,6 +493,31 @@ export default function Home() {
             }
         }
     }, [activeTextIndex, flatSentences]);
+
+    // Track scroll to update page number
+    useEffect(() => {
+        if (!isReadingMode || flatSentences.length === 0) return;
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const page = parseInt(entry.target.getAttribute('data-page') || '1');
+                    setCurrentPageNumber(page);
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '-10% 0px -80% 0px' });
+
+        // Observe elements that mark page boundaries or every sentence
+        // For simplicity and accuracy, we'll observe a sampling of sentences
+        flatSentences.forEach((s, i) => {
+            if (i % 10 === 0 || s.isParagraphEnd) { // Check every 10 sentences or end of paragraphs
+                const el = document.getElementById(`sentence-${s.globalIndex}`);
+                if (el) observer.observe(el);
+            }
+        });
+
+        return () => observer.disconnect();
+    }, [isReadingMode, flatSentences, isReadingMode]);
 
     const toggleHighlight = (index: number) => {
         setUserHighlights(prev => {
@@ -402,10 +552,8 @@ export default function Home() {
         }
     };
 
-    // Get sentences for current page
-    const currentSentences = useMemo(() => {
-        return flatSentences.filter(s => s.page === currentPageNumber);
-    }, [flatSentences, currentPageNumber]);
+    // Render all sentences (Vertical Scroll)
+    const sentencesToRender = flatSentences;
 
     return (
         <div className="relative flex min-h-screen flex-col overflow-x-hidden">
@@ -480,8 +628,13 @@ export default function Home() {
                                             Start Reading
                                         </button>
                                     ) : (
-                                        <div className="flex items-center justify-center rounded-lg h-12 px-8 bg-black dark:bg-white text-white dark:text-black text-base font-bold shadow-lg shadow-black/25 hover:bg-gray-800 dark:hover:bg-gray-200 transition-all active:scale-95">
-                                            {loading ? "Analyzing Document..." : "Browse Files"}
+                                        <div className="flex flex-col items-center gap-3">
+                                            <div className="flex items-center justify-center rounded-lg h-12 px-8 bg-black dark:bg-white text-white dark:text-black text-base font-bold shadow-lg shadow-black/25 hover:bg-gray-800 dark:hover:bg-gray-200 transition-all active:scale-95">
+                                                {loading ? "Processing..." : "Browse Files"}
+                                            </div>
+                                            {loading && processingStep && (
+                                                <p className="text-sm font-medium text-slate-500 animate-pulse">{processingStep}</p>
+                                            )}
                                         </div>
                                     )}
                                 </div>
@@ -542,7 +695,7 @@ export default function Home() {
                 /* Reading View */
                 <div className="flex flex-col min-h-screen relative">
                     {/* Top Navigation Bar */}
-                    <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md px-6 py-3">
+                    <header className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md px-6 py-3 transition-transform duration-500 ${isFocusMode ? '-translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
                         <div className="flex items-center gap-3">
                             <button onClick={exitReadingMode} className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-full transition-colors flex items-center justify-center">
                                 <span className="material-symbols-outlined text-slate-600 dark:text-slate-400">arrow_back</span>
@@ -552,7 +705,16 @@ export default function Home() {
                                 <p className="text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-semibold">Page {currentPageNumber} of {availablePages[availablePages.length - 1] || 1}</p>
                             </div>
                         </div>
+
+                        {/* Focus Toggle (Always accessible in header center if needed, but here we place it in buttons) */}
                         <div className="flex items-center gap-2">
+                            <button 
+                                onClick={() => setIsFocusMode(!isFocusMode)} 
+                                className={`flex items-center justify-center p-2 rounded-lg transition-all ${isFocusMode ? 'bg-black text-white dark:bg-white dark:text-black' : 'hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400'}`}
+                                title={isFocusMode ? "Disable Focus Mode" : "Enable Focus Mode"}
+                            >
+                                <span className="material-symbols-outlined">{isFocusMode ? 'visibility_off' : 'visibility'}</span>
+                            </button>
                             <button onClick={() => setIsSearchOpen(!isSearchOpen)} className="flex items-center justify-center p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition-colors">
                                 <span className="material-symbols-outlined">search</span>
                             </button>
@@ -579,6 +741,7 @@ export default function Home() {
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                         className="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-xl pl-10 pr-4 py-3 text-sm focus:ring-2 focus:ring-black dark:focus:ring-white text-slate-900 dark:text-slate-100 shadow-inner"
+                                        aria-label="Search document"
                                     />
                                 </div>
 
@@ -612,48 +775,44 @@ export default function Home() {
                             </div>
                         )}
                     </header>
+
+                    {/* Floating Focus Mode Toggle (Visible only when focus mode is active) */}
+                    {isFocusMode && (
+                        <button
+                            onClick={() => setIsFocusMode(false)}
+                            className="fixed top-4 right-4 z-[60] size-10 flex items-center justify-center rounded-full bg-slate-900/20 dark:bg-white/20 text-slate-900 dark:text-white backdrop-blur-md hover:bg-slate-900/30 dark:hover:bg-white/30 transition-all border border-slate-900/10 dark:border-white/10 shadow-lg"
+                            title="Exit Focus Mode (Ctrl+F)"
+                        >
+                            <span className="material-symbols-outlined text-lg">visibility_off</span>
+                        </button>
+                    )}
                     {/* Reader Progress Bar (Fixed Top) */}
-                    <div className="fixed top-[57px] left-0 right-0 z-50 h-1 bg-slate-200 dark:bg-slate-800">
+                    <div className={`fixed top-[57px] left-0 right-0 z-50 h-1 bg-slate-200 dark:bg-slate-800 transition-opacity duration-500 ${isFocusMode ? 'opacity-0' : 'opacity-100'}`}>
                         <div className="h-full bg-black dark:bg-white transition-all duration-300 ease-out" style={{ width: `${activeTextIndex !== null && flatSentences.length > 0 ? ((activeTextIndex + 1) / flatSentences.length) * 100 : 0}%` }}></div>
                     </div>
 
                     {/* Main Content Area */}
-                    <main className="relative min-h-screen pt-24 pb-32 px-6 md:px-12 flex justify-center">
-                        {/* Left Navigation Zone (Always Visible Button) */}
-                        <div
-                            onClick={() => setCurrentPageNumber(p => Math.max(1, p - 1))}
-                            className={`fixed left-0 top-[150px] bottom-32 w-12 md:w-24 z-10 cursor-pointer flex items-center justify-center group transition-all hover:bg-slate-100 dark:hover:bg-slate-800 border-r border-transparent hover:border-slate-200 dark:hover:border-slate-700 ${currentPageNumber <= 1 ? 'hidden' : ''}`}
-                        >
-                            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-3 rounded-r-2xl shadow-sm border border-l-0 border-slate-200 dark:border-slate-700 text-slate-400 group-hover:text-black dark:group-hover:text-white transition-colors flex items-center justify-center">
-                                <span className="material-symbols-outlined text-3xl md:text-4xl">chevron_left</span>
-                            </div>
-                        </div>
-
-                        {/* Right Navigation Zone (Always Visible Button) */}
-                        <div
-                            onClick={() => setCurrentPageNumber(p => Math.min(availablePages[availablePages.length - 1] || 1, p + 1))}
-                            className={`fixed right-0 top-[150px] bottom-32 w-12 md:w-24 z-10 cursor-pointer flex items-center justify-center group transition-all hover:bg-slate-100 dark:hover:bg-slate-800 border-l border-transparent hover:border-slate-200 dark:hover:border-slate-700 ${currentPageNumber >= (availablePages[availablePages.length - 1] || 1) ? 'hidden' : ''}`}
-                        >
-                            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-3 rounded-l-2xl shadow-sm border border-r-0 border-slate-200 dark:border-slate-700 text-slate-400 group-hover:text-black dark:group-hover:text-white transition-colors flex items-center justify-center">
-                                <span className="material-symbols-outlined text-3xl md:text-4xl">chevron_right</span>
-                            </div>
-                        </div>
-
+                    <main 
+                        className="relative min-h-screen pt-24 pb-32 px-6 md:px-12 flex justify-center"
+                    >
                         <article className="max-w-[800px] w-full mx-auto font-serif text-xl md:text-3xl leading-relaxed md:leading-[1.8] text-slate-800 dark:text-slate-200">
-                            {currentSentences.length === 0 ? (
-                                <p className="text-center text-slate-500 dark:text-slate-400 py-20 font-light text-2xl">No text on this page.</p>
+                            {sentencesToRender.length === 0 ? (
+                                <p className="text-center text-slate-500 dark:text-slate-400 py-20 font-light text-2xl">No text to display.</p>
                             ) : (
                                 <div className="whitespace-pre-wrap transition-all duration-500">
-                                    {currentSentences.map((sentence) => {
+                                    {sentencesToRender.map((sentence) => {
                                         const isActive = activeTextIndex === sentence.globalIndex;
                                         const isHighlighted = userHighlights.has(sentence.globalIndex);
                                         const hasNote = !!userNotes[sentence.globalIndex];
+                                        const isSearchResult = transientSearchHighlight === sentence.globalIndex;
                                         const isSelected = selectedSentenceForAnnotation === sentence.globalIndex;
 
                                         let styleClasses = "cursor-pointer transition-all duration-300 inline py-0.5 md:py-1 pr-1 relative z-10 ";
 
                                         if (isActive) {
                                             styleClasses += "bg-black/10 dark:bg-white/20 border-l-4 border-black dark:border-white pl-4 py-1 inline-block rounded-r-lg text-black dark:text-white font-medium ";
+                                        } else if (isSearchResult) {
+                                            styleClasses += "!bg-black/20 dark:!bg-white/30 !ring-4 !ring-black dark:!ring-white shadow-2xl pl-1 rounded-lg ";
                                         } else if (isHighlighted && isSelected) {
                                             styleClasses += "bg-gray-300/50 dark:bg-gray-500/50 text-black dark:text-white pl-1 ring-4 ring-black dark:ring-white rounded-lg ";
                                         } else if (isHighlighted) {
@@ -665,7 +824,7 @@ export default function Home() {
                                         }
 
                                         return (
-                                            <span key={sentence.globalIndex} className="relative inline">
+                                            <span key={sentence.globalIndex} className="relative inline" data-page={sentence.page}>
                                                 <span
                                                     id={`sentence-${sentence.globalIndex}`}
                                                     onClick={() => handleSentenceClick(sentence.globalIndex)}
@@ -682,8 +841,8 @@ export default function Home() {
 
                                                 {/* Annotation Popup Context Menu */}
                                                 {isSelected && (
-                                                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-4 z-50 bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl p-5 w-80 backdrop-blur-xl font-sans text-base">
-                                                        <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-gray-900 border-t border-l border-gray-700 rotate-45"></div>
+                                                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-4 z-50 glass-dark rounded-2xl shadow-2xl p-5 w-80 font-sans text-base animate-in fade-in zoom-in duration-200">
+                                                        <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-slate-900 border-t border-l border-slate-700/50 rotate-45"></div>
                                                         <div className="relative">
                                                             <div className="flex gap-3 mb-4">
                                                                 <button
@@ -746,9 +905,9 @@ export default function Home() {
                         />
                     )}
 
-                    {/* Floating Playback Controls Overlay - Docked Bottom */}
+                    {/* Playback Controls (Sticky Bottom) */}
                     {flatSentences.length > 0 && (
-                        <footer className="fixed bottom-0 left-0 right-0 z-50 pb-6 md:pb-8 px-4 pointer-events-none">
+                        <footer className={`fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 dark:border-slate-800 bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-xl px-4 md:px-12 py-4 md:py-6 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] transition-transform duration-500 ${isFocusMode ? 'translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
                             <div className="max-w-4xl mx-auto bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-2xl md:rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl p-4 md:p-6 pointer-events-auto transition-transform">
                                 <div className="flex flex-col gap-4 md:gap-6">
                                     {/* Visual Progress Bar (Non-interactive yet) */}
