@@ -1,0 +1,8 @@
+__pycache__
+.next
+node_modules
+.env
+*.pdf
+*.txt
+!requirements.txt
+!requirements_test.txt
