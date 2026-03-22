@@ -36,7 +36,7 @@ const VOICE_TYPE_PRESETS: VoiceTypePreset[] = [
 ];
 
 /** Same-origin Next.js API routes (replaces separate Python server). */
-const API_BASE_URL = "";
+const API_BASE_URL = "http://localhost:8000";
 
 export default function Home() {
     const [file, setFile] = useState<File | null>(null);
