@@ -35,7 +35,8 @@ const VOICE_TYPE_PRESETS: VoiceTypePreset[] = [
     { id: "news", label: "News", description: "Crisp & formal", icon: "newspaper", voice: "en-US-SteffanNeural", speed: 1.05 },
 ];
 
-const API_BASE_URL = "http://127.0.0.1:8000";
+/** Same-origin Next.js API routes (replaces separate Python server). */
+const API_BASE_URL = "";
 
 export default function Home() {
     const [file, setFile] = useState<File | null>(null);
@@ -388,7 +389,7 @@ export default function Home() {
                 setIsReadingMode(true);
             }
         } catch (err) {
-            alert("Could not connect to the backend server. Please start the Python server (python server.py) first.");
+            alert("Upload failed. Run the app with npm run dev (or npm run build && npm start) and try again.");
         }
         setLoading(false);
         setProcessingStep("");
