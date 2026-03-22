@@ -1,4 +1,5 @@
 @echo off
-echo Starting Audiobook Backend Server...
-start "" "http://localhost:8000"
-python server.py
+cd /d "%~dp0"
+echo Starting Voice Tech (Next.js)...
+start "" "http://localhost:3000"
+npm run dev
