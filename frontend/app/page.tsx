@@ -35,8 +35,9 @@ const VOICE_TYPE_PRESETS: VoiceTypePreset[] = [
     { id: "news", label: "News", description: "Crisp & formal", icon: "newspaper", voice: "en-US-SteffanNeural", speed: 1.05 },
 ];
 
-/** Same-origin Next.js API routes (replaces separate Python server). */
-const API_BASE_URL = "http://localhost:8000";
+/** API Base URL: Uses NEXT_PUBLIC_API_URL env var if set, otherwise defaults to same-origin. */
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
+// NOTE: For local development with the Python backend, set NEXT_PUBLIC_API_URL=http://localhost:8000
 
 export default function Home() {
     const [file, setFile] = useState<File | null>(null);
@@ -389,6 +390,7 @@ export default function Home() {
                 setIsReadingMode(true);
             }
         } catch (err) {
+            console.error("Upload error:", err);
             alert("Upload failed. Run the app with npm run dev (or npm run build && npm start) and try again.");
         }
         setLoading(false);

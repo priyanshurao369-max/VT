@@ -117,17 +117,19 @@ export async function POST(req: NextRequest) {
         content: [{ page: 1, text: "No readable text found in this PDF." }],
       });
     }
+    console.log("Upload Success, content size:", text_content.length);
     return NextResponse.json({ message: "Success", content: text_content });
   } catch (e) {
+    console.error("Upload Route Error:", e);
     return NextResponse.json({
       message: "Error extracting text",
       content: [
         {
           page: 1,
-          text: `Error: Could not read as PDF. The file might be corrupted or not a valid PDF document. (${String(e)})`,
+          text: `Error: Could not read as PDF. (${String(e)})`,
         },
       ],
-    });
+    }, { status: 500 });
   } finally {
     await parser.destroy();
   }
